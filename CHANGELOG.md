@@ -3,6 +3,15 @@
 All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] — 2026-04-28
+
+### Added
+
+- `mcpName` field in `mcp-attest-demo/package.json`
+  (`io.studiomeyer/server-attestation`) so the reference server can be
+  claimed and listed in the official MCP Registry. Library + CLI packages
+  remain at 0.1.0 (no MCP-server identity to register).
+
 ## [0.1.0] — 2026-04-27
 
 Initial release.

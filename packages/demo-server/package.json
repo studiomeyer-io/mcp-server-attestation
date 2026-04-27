@@ -1,6 +1,7 @@
 {
   "name": "mcp-attest-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.studiomeyer/server-attestation",
   "description": "Reference MCP server demonstrating mcp-server-attestation library — 5 tools for keygen, sign, verify, template-generation, and spawn-inspection. stdio transport, MCP spec 2025-06-18.",
   "type": "module",
   "main": "./dist/server.js",
