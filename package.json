@@ -1,0 +1,32 @@
+{
+  "name": "mcp-server-attestation-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tool-Manifest-Attestation for Model Context Protocol. Layer-2 mitigation for marketplace-poisoning (OX Security April 2026), CVE-2025-69256 (Serverless MCP RCE), CVE-2025-61591 (Cursor MCP RCE). Ed25519 signed manifests, runtime spawn-attestation, default-deny argument sanitizer.",
+  "type": "module",
+  "workspaces": [
+    "packages/lib",
+    "packages/cli",
+    "packages/demo-server"
+  ],
+  "scripts": {
+    "build": "tsc -b && chmod +x packages/demo-server/dist/server.js packages/cli/dist/bin.js",
+    "typecheck": "tsc -b --pretty",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf packages/*/dist tsconfig.tsbuildinfo packages/*/tsconfig.tsbuildinfo"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT",
+  "author": "Matthias Meyer (StudioMeyer)",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  },
+  "mcp": {
+    "supportedSpecVersions": ["2025-06-18"]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "mcp-server-attestation",
+  "version": "0.1.0",
+  "description": "Library for Ed25519-signed MCP tool manifests, runtime spawn-attestation, default-deny argument sanitizer. Layer-2 mitigation for marketplace-poisoning, CVE-2025-69256, CVE-2025-61591.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./manifest": {
+      "import": "./dist/manifest.js",
+      "types": "./dist/manifest.d.ts"
+    },
+    "./sign": {
+      "import": "./dist/sign.js",
+      "types": "./dist/sign.d.ts"
+    },
+    "./verify": {
+      "import": "./dist/verify.js",
+      "types": "./dist/verify.d.ts"
+    },
+    "./spawn": {
+      "import": "./dist/spawn.js",
+      "types": "./dist/spawn.d.ts"
+    },
+    "./trust": {
+      "import": "./dist/trust.js",
+      "types": "./dist/trust.d.ts"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "attestation",
+    "ed25519",
+    "signing",
+    "manifest",
+    "supply-chain",
+    "security"
+  ],
+  "engines": { "node": ">=20.0.0" },
+  "license": "MIT",
+  "author": "Matthias Meyer (StudioMeyer)",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studiomeyer-io/mcp-server-attestation.git",
+    "directory": "packages/lib"
+  },
+  "homepage": "https://github.com/studiomeyer-io/mcp-server-attestation#readme",
+  "bugs": {
+    "url": "https://github.com/studiomeyer-io/mcp-server-attestation/issues"
+  },
+  "dependencies": {
+    "zod": "^3.23.0"
+  },
+  "mcp": {
+    "supportedSpecVersions": ["2025-06-18"]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "mcp-attest-cli",
+  "version": "0.1.0",
+  "description": "CLI for MCP tool-manifest attestation: keygen, sign, verify, inspect, fingerprint, check-pin.",
+  "type": "module",
+  "main": "./dist/bin.js",
+  "types": "./dist/bin.d.ts",
+  "bin": {
+    "mcp-attest": "./dist/bin.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -b && chmod +x dist/bin.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["mcp", "attestation", "cli", "ed25519"],
+  "engines": { "node": ">=20.0.0" },
+  "license": "MIT",
+  "author": "Matthias Meyer (StudioMeyer)",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studiomeyer-io/mcp-server-attestation.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/studiomeyer-io/mcp-server-attestation#readme",
+  "bugs": {
+    "url": "https://github.com/studiomeyer-io/mcp-server-attestation/issues"
+  },
+  "dependencies": {
+    "mcp-server-attestation": "0.1.0"
+  }
+}

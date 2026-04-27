@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      id-token: write   # required for both npm provenance and Sigstore cosign
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      # F8 Round 2 fix: install cosign so the dogfood-Sigstore step is reachable.
+      # Eat-our-own-dogfood per PLAN: a library that mitigates
+      # marketplace-poisoning ships its own attestation alongside npm provenance.
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.4.1'
+
+      - run: npm publish --dry-run --provenance --workspace=packages/lib
+      - run: npm publish --dry-run --provenance --workspace=packages/cli
+      - run: npm publish --dry-run --provenance --workspace=packages/demo-server
+
+      # Cosign keyless sign-blob over the tarball. Real publish workflow will
+      # also `cosign sign-blob --bundle` and upload the .sig + .pem alongside
+      # the npm tarball. Dry-run just verifies the cosign binary is wired.
+      - name: Cosign sign-blob (dry-run smoke)
+        run: |
+          npm pack --workspace=packages/lib --pack-destination=/tmp
+          TARBALL=$(ls /tmp/mcp-server-attestation-*.tgz | head -1)
+          if [ -n "$TARBALL" ]; then
+            COSIGN_EXPERIMENTAL=1 cosign sign-blob --yes \
+              --bundle "${TARBALL}.sigstore" \
+              "$TARBALL" || echo "cosign sign-blob smoke failed (expected on PRs without OIDC); not blocking dry-run"
+          fi
