@@ -113,6 +113,10 @@ Test corpus includes CVE-replay fixtures (`packages/lib/tests/fixtures/cve-2025-
 - Reference server submitted to mcp.so and FastMCP Directory.
 - Library separately published as `mcp-server-attestation`.
 
+## About StudioMeyer
+
+[StudioMeyer](https://studiomeyer.io) is an AI and design studio from Palma de Mallorca, building custom websites and AI infrastructure for small and medium businesses. Production stack on Claude Agent SDK, MCP, n8n and an in-house observability and guard layer.
+
 ## License
 
 MIT, Copyright 2026 Matthias Meyer (StudioMeyer). See `LICENSE`.
