@@ -4,7 +4,14 @@
 
 # mcp-server-attestation
 
-Layer-2 supply-chain hardening for Model Context Protocol servers. Ed25519-signed tool manifests, runtime spawn-attestation, default-deny argument sanitizer.
+
+<!-- badges -->
+[![npm version](https://img.shields.io/npm/v/mcp-server-attestation?style=flat-square&color=cb3837&logo=npm&label=npm)](https://www.npmjs.com/package/mcp-server-attestation)
+[![npm downloads](https://img.shields.io/npm/dm/mcp-server-attestation?style=flat-square&color=cb3837&logo=npm&label=installs%2Fmo)](https://www.npmjs.com/package/mcp-server-attestation)
+![License](https://img.shields.io/github/license/studiomeyer-io/mcp-server-attestation?style=flat-square&color=22c55e&label=license)
+![Last commit](https://img.shields.io/github/last-commit/studiomeyer-io/mcp-server-attestation?style=flat-square&color=88c0d0&label=updated)
+![GitHub stars](https://img.shields.io/github/stars/studiomeyer-io/mcp-server-attestation?style=flat-square&color=ffd700&logo=github&label=stars)
+<!-- /badges -->Layer-2 supply-chain hardening for Model Context Protocol servers. Ed25519-signed tool manifests, runtime spawn-attestation, default-deny argument sanitizer.
 
 Direct response to:
 - **OX Security marketplace-poisoning, April 2026** — 9 of 11 MCP registries accepted malicious servers. Anthropic's published position: "expected behavior".
