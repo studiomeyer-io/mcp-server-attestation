@@ -22,9 +22,9 @@
   "license": "MIT",
   "author": "Matthias Meyer (StudioMeyer)",
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "typescript": "^5.4.0",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   },
   "mcp": {
     "supportedSpecVersions": ["2025-06-18"]
