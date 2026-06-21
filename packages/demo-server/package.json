@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "mcp-server-attestation": "0.1.0",
+    "mcp-server-attestation": "0.2.0",
     "zod": "^4.4.3"
   },
   "mcp": {
