@@ -1,6 +1,17 @@
+<!-- studiomeyer-mcp-stack-banner:start -->
+> **Part of the [StudioMeyer MCP Stack](https://studiomeyer.io)** — Built in Mallorca 🌴 · ⭐ if you use it
+<!-- studiomeyer-mcp-stack-banner:end -->
+
 # mcp-server-attestation
 
-Layer-2 supply-chain hardening for Model Context Protocol servers. Ed25519-signed tool manifests, runtime spawn-attestation, default-deny argument sanitizer.
+
+<!-- badges -->
+[![npm version](https://img.shields.io/npm/v/mcp-server-attestation?style=flat-square&color=cb3837&logo=npm&label=npm)](https://www.npmjs.com/package/mcp-server-attestation)
+[![npm downloads](https://img.shields.io/npm/dm/mcp-server-attestation?style=flat-square&color=cb3837&logo=npm&label=installs%2Fmo)](https://www.npmjs.com/package/mcp-server-attestation)
+![License](https://img.shields.io/github/license/studiomeyer-io/mcp-server-attestation?style=flat-square&color=22c55e&label=license)
+![Last commit](https://img.shields.io/github/last-commit/studiomeyer-io/mcp-server-attestation?style=flat-square&color=88c0d0&label=updated)
+![GitHub stars](https://img.shields.io/github/stars/studiomeyer-io/mcp-server-attestation?style=flat-square&color=ffd700&logo=github&label=stars)
+<!-- /badges -->Layer-2 supply-chain hardening for Model Context Protocol servers. Ed25519-signed tool manifests, runtime spawn-attestation, default-deny argument sanitizer.
 
 Direct response to:
 - **OX Security marketplace-poisoning, April 2026** — 9 of 11 MCP registries accepted malicious servers. Anthropic's published position: "expected behavior".
@@ -8,6 +19,16 @@ Direct response to:
 - **CVE-2025-61591** — Cursor MCP RCE through OAuth-installed malicious server with spawn hijack.
 
 This package provides what Anthropic chose not to: cryptographic verification of which tools a server is allowed to expose and which spawn calls it is allowed to make. It is a drop-in dependency, not a runtime replacement.
+
+## A note from us
+
+We have been building tools and systems for ourselves for the past two years. The fact that this repo is small and has few stars is not because it is new. It is because we only just decided to share what we have built. It is not a fresh experiment, it is a long story with a recent commit.
+
+We love building things and sharing them. We do not love social media tactics, growth hacks, or chasing stars and followers. So this repo is small. The code is real, it gets used, issues get answered. Judge for yourself.
+
+If it helps you, sharing, testing, and feedback help us. If it could be better, an issue is more useful. If you build something with it, tell us at hello@studiomeyer.io. That genuinely makes our day.
+
+From a small studio in Palma de Mallorca.
 
 ## Packages (npm workspaces)
 
@@ -120,6 +141,10 @@ Test corpus includes CVE-replay fixtures (`packages/lib/tests/fixtures/cve-2025-
 - npm publish via GitHub Actions OIDC with `--provenance`.
 - Reference server submitted to mcp.so and FastMCP Directory.
 - Library separately published as `mcp-server-attestation`.
+
+## About StudioMeyer
+
+[StudioMeyer](https://studiomeyer.io) is an AI and design studio based in Palma de Mallorca, working with clients worldwide. We build custom websites and AI infrastructure for small and medium businesses. Production stack on Claude Agent SDK, MCP and n8n, with Sentry, Langfuse and LangGraph for observability and an in-house guard layer.
 
 ## License
 
