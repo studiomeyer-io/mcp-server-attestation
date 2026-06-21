@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-attestation",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Library for Ed25519-signed MCP tool manifests, runtime spawn-attestation, default-deny argument sanitizer. Layer-2 mitigation for marketplace-poisoning, CVE-2025-69256, CVE-2025-61591.",
   "type": "module",
   "main": "./dist/index.js",

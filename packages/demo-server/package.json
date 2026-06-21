@@ -1,6 +1,6 @@
 {
   "name": "mcp-attest-demo",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "mcpName": "io.studiomeyer/server-attestation",
   "description": "Reference MCP server demonstrating mcp-server-attestation library — 5 tools for keygen, sign, verify, template-generation, and spawn-inspection. stdio transport, MCP spec 2025-06-18.",
   "type": "module",
@@ -9,14 +9,26 @@
   "bin": {
     "mcp-attest-demo": "./dist/server.js"
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -b && chmod +x dist/server.js",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server.js"
   },
-  "keywords": ["mcp", "model-context-protocol", "attestation", "demo", "reference-server"],
-  "engines": { "node": ">=20.0.0" },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "attestation",
+    "demo",
+    "reference-server"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "license": "MIT",
   "author": "Matthias Meyer (StudioMeyer)",
   "publishConfig": {
@@ -37,7 +49,9 @@
     "zod": "^4.4.3"
   },
   "mcp": {
-    "supportedSpecVersions": ["2025-06-18"],
+    "supportedSpecVersions": [
+      "2025-06-18"
+    ],
     "transport": "stdio"
   }
 }

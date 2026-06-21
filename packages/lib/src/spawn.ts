@@ -6,6 +6,7 @@ import {
   type ToolDecl,
 } from "./manifest.js";
 import { AttestationError } from "./errors.js";
+import { verifyManifest, type VerifyOptions } from "./verify.js";
 
 /**
  * Default-deny shell-metacharacter set blocked by `shellSafeString` rules.
@@ -33,6 +34,13 @@ const FORBIDDEN_CODEPOINTS: ReadonlySet<number> = (() => {
     0x00, // null
     0x0a, // LF
     0x0d, // CR
+    // Other C0 control whitespace some shells/parsers treat as token
+    // separators or line breaks. LF/CR are handled above; VT, FF and NEL
+    // complete the newline/whitespace-separator default-deny so an attacker
+    // cannot smuggle a line break past a `shellSafeString` rule.
+    0x0b, // VT  (vertical tab)
+    0x0c, // FF  (form feed)
+    0x85, // NEL (Unicode next-line; acts as a newline under NFKC / many terminals)
     // Zero-width / formatting
     0x200b, 0x200c, 0x200d, 0x200e, 0x200f,
     // Bidi overrides
@@ -112,6 +120,29 @@ export function evalArgRule(value: unknown, rule: ArgRule): string[] {
   }
   switch (rule.kind) {
     case "regex": {
+      // ReDoS guard (primary): refuse to run a pattern whose structure is
+      // prone to catastrophic backtracking. The pattern comes from the signed
+      // manifest, but the *value* is attacker-controlled — a careless author
+      // pattern like `(a+)+$` lets a crafted value hang the spawn hot path for
+      // tens of seconds. We never execute such a pattern; we fail closed.
+      if (looksCatastrophic(rule.pattern)) {
+        reasons.push(
+          `arg "${rule.name}" rule uses a regex prone to catastrophic backtracking (nested unbounded quantifiers); refusing to evaluate. Rewrite the pattern without nested quantifiers like (a+)+`,
+        );
+        return reasons;
+      }
+      // ReDoS guard (defense-in-depth): bound the attacker-controlled input
+      // length before handing it to the engine. Fall back to 4096 when the
+      // value is absent so the cap also applies to manifests built in-memory
+      // (where the Zod default has not materialised) — same principle as the
+      // prefix denyTraversal default.
+      const regexMaxLength = rule.maxLength ?? 4096;
+      if (value.length > regexMaxLength) {
+        reasons.push(
+          `arg "${rule.name}" length ${value.length} exceeds regex maxLength ${regexMaxLength}`,
+        );
+        return reasons;
+      }
       let re: RegExp;
       try {
         re = new RegExp(rule.pattern, rule.flags);
@@ -144,6 +175,18 @@ export function evalArgRule(value: unknown, rule: ArgRule): string[] {
         if (suffix.length > rule.maxSuffixLength) {
           reasons.push(`arg "${rule.name}" suffix length ${suffix.length} exceeds max ${rule.maxSuffixLength}`);
         }
+        // Path-traversal guard: a bare prefix check is bypassable via `..`.
+        // `/safe/../../etc/passwd` satisfies `prefix: "/safe/"` but escapes the
+        // directory. Reject `..` path components anywhere in the value unless
+        // the rule explicitly opts out with `denyTraversal: false`.
+        //
+        // We test `!== false` rather than truthiness so the secure behaviour
+        // also holds for manifests constructed in-memory and signed directly
+        // (where the Zod `.default(true)` has not materialised) — the safe
+        // default must apply at the point of enforcement, not only after parse.
+        if (rule.denyTraversal !== false && containsTraversal(value)) {
+          reasons.push(`arg "${rule.name}" contains a path-traversal segment (".."); refused by prefix rule`);
+        }
       }
       break;
     }
@@ -167,6 +210,122 @@ export function evalArgRule(value: unknown, rule: ArgRule): string[] {
     }
   }
   return reasons;
+}
+
+/**
+ * Reject values containing a `..` path-traversal segment. Conservative: only
+ * a genuine `..` *component* trips this — bounded by a path separator, the
+ * string boundary, or its URL-encoded form `%2e%2e`. A literal `..` embedded
+ * in a longer token (e.g. `file..name`) is NOT a traversal component and is
+ * left alone, so legitimate values are not over-blocked.
+ *
+ * Handles both POSIX (`/`) and Windows (`\\`) separators and percent-encoding.
+ */
+export function containsTraversal(value: string): boolean {
+  const lowered = value.toLowerCase();
+  // Percent-encoded `..` (covers %2e%2e and mixed `.%2e` / `%2e.`).
+  const decodedDots = lowered.replace(/%2e/g, ".");
+  // A `..` component is one bounded on both sides by a separator or boundary.
+  // [/\\] or start/end of string. We test the decoded form so encoded
+  // traversal is caught too.
+  return /(^|[/\\])\.\.([/\\]|$)/.test(decodedDots);
+}
+
+/**
+ * Static, O(n) detector for regex patterns prone to catastrophic backtracking.
+ *
+ * It scans the pattern string (never executes it, so the detector itself
+ * cannot ReDoS) and flags the structural cause of exponential/polynomial
+ * blowup: a group that contains an unbounded quantifier (`*`, `+`, `{n,}`) and
+ * is itself amplified by another quantifier — `(a+)+`, `(a*)*`, `(.*)+`,
+ * `(.*a){15}`, `((ab)*)*`, etc.
+ *
+ * Conservative by design: it flags nested-quantifier constructs (the dangerous
+ * ones) and leaves flat patterns — `^[a-z]+$`, `^\d{1,10}$`, `(foo|bar)`,
+ * `(ab){2,5}`, semver — untouched. False positives mean a server author must
+ * rewrite an avoidable nested quantifier; false negatives would let an attacker
+ * hang the host, so we err toward rejecting.
+ */
+export function looksCatastrophic(pattern: string): boolean {
+  let depth = 0;
+  // Per nesting level: does the group at this depth contain an unbounded
+  // quantifier somewhere inside it?
+  const groupHasUnbounded: boolean[] = [];
+  let i = 0;
+  while (i < pattern.length) {
+    const ch = pattern[i]!;
+    if (ch === "\\") {
+      // Escaped atom — skip the escape and the next char.
+      i += 2;
+      continue;
+    }
+    if (ch === "[") {
+      // Character class — skip to the matching ], honouring escapes.
+      i++;
+      while (i < pattern.length && pattern[i] !== "]") {
+        if (pattern[i] === "\\") i++;
+        i++;
+      }
+      i++;
+      continue;
+    }
+    if (ch === "(") {
+      depth++;
+      groupHasUnbounded[depth] = false;
+      i++;
+      continue;
+    }
+    if (ch === ")") {
+      const innerUnbounded = groupHasUnbounded[depth] === true;
+      const next = pattern[i + 1];
+      let quantAmplifies = false;
+      if (next !== undefined && (next === "*" || next === "+")) {
+        quantAmplifies = true; // ) followed by * or +
+      } else if (next === "{") {
+        const close = pattern.indexOf("}", i + 1);
+        if (close > 0) {
+          const body = pattern.slice(i + 2, close);
+          if (/,\s*$/.test(body) || /,\s*\d{2,}\s*$/.test(body)) {
+            quantAmplifies = true; // {n,} open-ended or large upper bound
+          } else {
+            const m = /^(\d+)\s*(?:,\s*(\d+)\s*)?$/.exec(body);
+            if (m) {
+              const lo = Number(m[1]);
+              const hi = m[2] !== undefined ? Number(m[2]) : lo;
+              // {2}+ repetition of an unbounded-quantifier group → polynomial.
+              if (hi >= 2 || lo >= 2) quantAmplifies = true;
+            }
+          }
+        }
+      }
+      if (innerUnbounded && quantAmplifies) return true;
+      // An unbounded-quantified group bubbles its unboundedness to the parent.
+      if (next !== undefined && (next === "*" || next === "+") && depth - 1 > 0) {
+        groupHasUnbounded[depth - 1] = true;
+      }
+      if (depth > 0) depth--;
+      i++;
+      continue;
+    }
+    if (ch === "*" || ch === "+") {
+      if (depth > 0) groupHasUnbounded[depth] = true;
+      i++;
+      continue;
+    }
+    if (ch === "{") {
+      const close = pattern.indexOf("}", i);
+      if (close > 0) {
+        const body = pattern.slice(i + 1, close);
+        if (/,\s*$/.test(body) || /,\s*\d{2,}\s*$/.test(body)) {
+          if (depth > 0) groupHasUnbounded[depth] = true;
+        }
+        i = close + 1;
+        continue;
+      }
+    }
+    i++;
+  }
+  return false;
 }
 
 interface ForbiddenHit {
@@ -297,4 +456,30 @@ export function attestSpawnStrict(signed: SignedManifest, request: SpawnRequest)
       { request, blockedReasons: result.blockedReasons },
     );
   }
+}
+
+/**
+ * Verify the manifest signature first, then attest the spawn. Fail-safe
+ * single call that closes the footgun where an *unverified* manifest is handed
+ * to `attestSpawn` — `attestSpawn` trusts that the caller already ran
+ * `verifyManifestStrict` at startup, but nothing structurally enforces it.
+ *
+ * Throws `AttestationError` with code `SIGNATURE_INVALID` if the signature
+ * does not verify, then the usual spawn-attestation codes if the request is
+ * not allowed. Re-verifying on every spawn costs one Ed25519 verify (~tens of
+ * microseconds); prefer this over bare `attestSpawnStrict` unless you have
+ * measured the verify out of a genuinely hot loop.
+ */
+export function attestSpawnVerified(
+  signed: SignedManifest,
+  request: SpawnRequest,
+  options: VerifyOptions = {},
+): void {
+  const result = verifyManifest(signed, options);
+  if (!result.valid) {
+    throw new AttestationError("SIGNATURE_INVALID", "Manifest verification failed before spawn attestation", {
+      errors: result.errors,
+    });
+  }
+  attestSpawnStrict(signed, request);
 }
