@@ -25,6 +25,17 @@ export const ArgRuleSchema = z.discriminatedUnion("kind", [
     kind: z.literal("regex"),
     pattern: z.string().min(1).max(2048),
     flags: z.string().max(8).optional(),
+    /**
+     * Hard cap on the length of the value handed to the regex engine.
+     *
+     * ReDoS defense-in-depth: catastrophic backtracking is super-linear in the
+     * input length, so bounding the attacker-controlled value bounds the worst
+     * case. `evalArgRule` rejects over-long values *before* calling `.test()`.
+     * The primary ReDoS guard is the static pattern check (see `spawn.ts`
+     * `looksCatastrophic`), which refuses to run a backtracking-prone pattern
+     * at all; this cap is the second layer. Default 4096.
+     */
+    maxLength: z.number().int().positive().max(65536).default(4096),
   }),
   baseArgRule.extend({
     kind: z.literal("enum"),
@@ -39,6 +50,19 @@ export const ArgRuleSchema = z.discriminatedUnion("kind", [
     kind: z.literal("prefix"),
     prefix: z.string().min(1).max(512),
     maxSuffixLength: z.number().int().nonnegative().max(65536).default(2048),
+    /**
+     * Reject `..` path segments anywhere in the value. The `prefix` rule's
+     * documented purpose is path-guarding (e.g. `prefix: "/safe/"`), but a bare
+     * `startsWith` check is bypassable: `/safe/../../etc/passwd` satisfies the
+     * prefix yet escapes the directory. With `denyTraversal` (default `true`)
+     * any value containing a `..` path component — `../`, `..\`, a leading or
+     * trailing `..`, or URL-encoded `%2e%2e` — is rejected.
+     *
+     * Default-on is the safe choice for a security package: a `..` inside a
+     * path-prefix-guarded argument is almost always an attack. Set to `false`
+     * to opt out when `..` is legitimately part of the value (rare).
+     */
+    denyTraversal: z.boolean().default(true),
   }),
   baseArgRule.extend({
     kind: z.literal("literal"),

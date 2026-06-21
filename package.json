@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-attestation-monorepo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Tool-Manifest-Attestation for Model Context Protocol. Layer-2 mitigation for marketplace-poisoning (OX Security April 2026), CVE-2025-69256 (Serverless MCP RCE), CVE-2025-61591 (Cursor MCP RCE). Ed25519 signed manifests, runtime spawn-attestation, default-deny argument sanitizer.",
   "type": "module",

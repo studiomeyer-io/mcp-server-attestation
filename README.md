@@ -44,6 +44,15 @@ attestSpawnStrict(signed as SignedManifest, { command, args });
 
 That is the entire integration. Two function calls, no SaaS, no daemon.
 
+If you would rather re-verify the signature on every spawn (defense-in-depth
+against an unverified or swapped manifest reaching the gate), use the single
+fail-safe call instead — it verifies *then* attests:
+
+```ts
+import { attestSpawnVerified, type SignedManifest } from "mcp-server-attestation";
+attestSpawnVerified(signed as SignedManifest, { command, args });
+```
+
 ## Tools (reference server `mcp-attest-demo`)
 
 | # | Name | readOnlyHint | destructiveHint |
@@ -84,7 +93,10 @@ The library is transport-agnostic. The reference server is stdio-only.
 
 - **Trust-on-First-Use** is the default. The first time you verify a server, its public key is pinned to `~/.mcp-attest/trust.json` (override: `MCP_ATTEST_TRUST_FILE`). Subsequent verifications reject any new key for the same server name with `TRUST_PIN_MISMATCH`. This catches the Cursor-style malicious-update vector.
 - **No bundled trusted-keys list.** This package does not act as a gatekeeper. If you want stronger assurance, opt into `--sigstore` to cross-reference the public-key fingerprint against the Sigstore Rekor transparency log.
-- **Default-deny argument sanitizer.** `shellSafeString` blocks every ASCII shell metacharacter, NUL, CR, LF, zero-width characters, BOM, RTL/LTR overrides, and Trojan-Source isolates. Allowlist behaviour requires the explicit `regex` / `enum` / `prefix` / `literal` rule kinds.
+- **Default-deny argument sanitizer.** `shellSafeString` blocks every ASCII shell metacharacter, NUL, CR, LF, VT, FF, NEL, zero-width characters, BOM, RTL/LTR overrides, Trojan-Source isolates, and fullwidth-Latin confusables. Allowlist behaviour requires the explicit `regex` / `enum` / `prefix` / `literal` rule kinds.
+- **ReDoS-safe `regex` rules.** A `regex` rule's pattern is signed by the author, but the argument value is attacker-controlled. The sanitizer statically detects backtracking-prone patterns (nested unbounded quantifiers like `(a+)+`) and refuses to run them, so a single crafted argument cannot freeze the spawn hot path. `regex` rules also carry a `maxLength` input cap (default 4096).
+- **Traversal-safe `prefix` rules.** `prefix` rules reject `..` path components by default (`denyTraversal: true`, including the `%2e%2e` encoded form), so `/safe/../../etc/passwd` is blocked even though it satisfies `prefix: "/safe/"`.
+- **Verify-then-attest.** `attestSpawnVerified` checks the manifest signature before attesting the spawn in one fail-safe call — use it instead of `attestSpawnStrict` unless you have measured the per-spawn Ed25519 verify out of a genuinely hot loop.
 - **Canonical JSON** is the signed surface. Re-serialisation cannot change the signed bytes.
 
 What this package does NOT do (out of scope):

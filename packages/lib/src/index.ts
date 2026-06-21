@@ -32,8 +32,11 @@ export type { VerificationResult } from "./verify.js";
 export {
   attestSpawn,
   attestSpawnStrict,
+  attestSpawnVerified,
   sanitizeArgs,
   evalArgRule,
+  looksCatastrophic,
+  containsTraversal,
 } from "./spawn.js";
 export type { SpawnRequest, SanitizationResult, AttestationResult } from "./spawn.js";
 

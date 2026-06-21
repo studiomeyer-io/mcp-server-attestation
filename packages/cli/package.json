@@ -1,6 +1,6 @@
 {
   "name": "mcp-attest-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLI for MCP tool-manifest attestation: keygen, sign, verify, inspect, fingerprint, check-pin.",
   "type": "module",
   "main": "./dist/bin.js",
@@ -30,6 +30,6 @@
     "url": "https://github.com/studiomeyer-io/mcp-server-attestation/issues"
   },
   "dependencies": {
-    "mcp-server-attestation": "0.1.0"
+    "mcp-server-attestation": "0.2.0"
   }
 }
