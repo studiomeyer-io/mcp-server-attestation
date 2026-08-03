@@ -44,7 +44,7 @@
     "url": "https://github.com/studiomeyer-io/mcp-server-attestation/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "mcp-server-attestation": "0.2.0",
     "zod": "^4.4.3"
   },
