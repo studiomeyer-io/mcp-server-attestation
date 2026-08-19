@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.studiomeyer/server-attestation",
+  "title": "MCP Server Attestation",
+  "description": "Ed25519-signed MCP tool manifests + spawn attestation. Layer-2 supply-chain hardening.",
+  "repository": {
+    "url": "https://github.com/studiomeyer-io/mcp-server-attestation",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "mcp-attest-demo",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
