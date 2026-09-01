@@ -24,7 +24,7 @@
   "devDependencies": {
     "@types/node": "^25.9.5",
     "typescript": "^5.4.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "mcp": {
     "supportedSpecVersions": ["2025-06-18"]
