@@ -68,7 +68,7 @@
     "url": "https://github.com/studiomeyer-io/mcp-server-attestation/issues"
   },
   "dependencies": {
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "mcp": {
     "supportedSpecVersions": [
