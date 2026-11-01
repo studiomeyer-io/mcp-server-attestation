@@ -3,6 +3,13 @@
 All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Dependency maintenance
+
+- Refresh the lockfile within existing manifest ranges, removing a stale nested library/Zod3 copy. Existing workspace manifests already use Zod4.6.7.
+- The checked workspace build/typecheck and 193 tests pass; the actual demo stdio handshake exposes five tools. All-dependency and production audits report zero findings.
+
 ## [0.2.0] — 2026-06-21
 
 Security hardening of the argument sanitizer and a new verify-then-attest
